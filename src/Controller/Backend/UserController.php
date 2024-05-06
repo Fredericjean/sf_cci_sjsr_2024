@@ -18,30 +18,30 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class UserController extends AbstractController
 {
     public function __construct(
-        private EntityManagerInterface $em,)
-    {    }
+        private EntityManagerInterface $em,
+    ) {
+    }
 
-    #[Route('', name: '.index', methods :['GET'])]
+    #[Route('', name: '.index', methods: ['GET'])]
     public function index(UserRepository $userRepo): Response
     {
         return $this->render('Backend/Users/index.html.twig', [
-            'users' => $userRepo ->findAll(),
+            'users' => $userRepo->findAll(),
         ]);
-        
     }
 
-    #[Route('/{id}/edit', name:'.update', methods :['GET','POST'])]
+    #[Route('/{id}/update', name: '.update', methods: ['GET', 'POST'])]
     public function update(?User $user, Request $request): Response|RedirectResponse
     {
-        if(!$user){
-        $this->addFlash('error','Utilisateur non trouvé');
-        return $this->redirectToRoute('admin.users.index');
+        if (!$user) {
+            $this->addFlash('error', 'Utilisateur non trouvé');
+            return $this->redirectToRoute('admin.users.index');
         }
 
-        $form = $this->createForm (UserType::class, $user, ['isAdmin' =>true]);
+        $form = $this->createForm(UserType::class, $user, ['isAdmin' => true]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($user);
             $this->em->flush();
 
@@ -50,9 +50,28 @@ class UserController extends AbstractController
             return $this->redirectToRoute('admin.users.index');
         }
         return $this->render('Backend/Users/update.html.twig', [
-        'form' =>$form
-    ]);
+            'form' => $form
+        ]);
     }
+    #[Route('/{id}/delete', name: '.delete', methods: ['POST'])]
+    public function delete(?User $user, Request $request): RedirectResponse
+    {
+        if (!$user) {
+            $this->addFlash('error', 'User non trouvé');
+
+            return $this->redirectToRoute('admin.users.index');
+        }
+
+        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('token')))
+        {
+            $this->em->remove($user);
+            $this->em->flush();
+
+            $this->addFlash('success', 'User supprimé avec succès');
+
+        }else{
+            $this->addFlash('error', 'Invalid token csrf');
+        }
+            return $this->redirectToRoute('admin.users.index');
+        }
 }
-
-
