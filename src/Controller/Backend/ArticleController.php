@@ -23,9 +23,9 @@ class ArticleController extends AbstractController
     #[Route('', name: '.index', methods: ['GET'])]
     public function index(ArticleRepository $articleRepo): Response
     {
-        return $this->render('Backend/Articles/index.html.twig',[
+        return $this->render('Backend/Articles/index.html.twig', [
 
-        'articles'=> $articleRepo ->findAll(),
+            'articles' => $articleRepo->findAll(),
         ]);
     }
 
@@ -39,6 +39,9 @@ class ArticleController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $user = $this->getuser();
+            $article->setUser($user);
+
             $this->em->persist($article);
             $this->em->flush();
 
@@ -52,30 +55,30 @@ class ArticleController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/update', name:'.update', methods: ['GET', 'POST'])]
-    public function update (?Article $article, Request $request): Response| RedirectResponse 
+    #[Route('/{id}/update', name: '.update', methods: ['GET', 'POST'])]
+    public function update(?Article $article, Request $request): Response| RedirectResponse
     {
         if (!$article) {
             $this->addFlash('error', 'Article non trouvé');
 
             return $this->redirectToRoute('admin.articles.index');
         }
-        $form =$this->createForm(ArticleType::class, $article );
+        $form = $this->createForm(ArticleType::class, $article, ['isEdit' => true]);
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($article);
             $this->em->flush();
 
-            $this->addFlash('success','Article mis à jour avec usccèe');
+            $this->addFlash('success', 'Article mis à jour avec usccèe');
             return $this->redirectToRoute('admin.articles.index');
         }
-        return $this->render('Backend/articles/update.html.twig',[
-            'form'=>$form,
+        return $this->render('Backend/articles/update.html.twig', [
+            'form' => $form,
         ]);
     }
-    #[Route('/{id}/delete', name:'.delete', methods:['POST'])]
-    public function delete (?Article $article, Request $request): RedirectResponse
+    #[Route('/{id}/delete', name: '.delete', methods: ['POST'])]
+    public function delete(?Article $article, Request $request): RedirectResponse
     {
         if (!$article) {
             $this->addFlash('error', 'Article non trouvé');
@@ -86,11 +89,10 @@ class ArticleController extends AbstractController
             $this->em->remove($article);
             $this->em->flush();
 
-            $this->addFlash('success', 'Article supprimé avec succès');  
+            $this->addFlash('success', 'Article supprimé avec succès');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalid');
+        }
+        return $this->redirectToRoute('admin.articles.index');
     }
-    else{
-        $this->addFlash('error', 'Token CSRF invalid');
-    }
-    return $this->redirectToRoute('admin.articles.index');
-}
 }
