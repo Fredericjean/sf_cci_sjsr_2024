@@ -2,13 +2,12 @@
 
 namespace App\Entity;
 
-use DateTimeImmutable;
+use App\Repository\ArticleRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\ArticleRepository;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQUE_TITLE_ARTICLE', fields: ['title'])]
@@ -29,7 +28,6 @@ class Article
     #[Assert\NotBlank]
     private ?string $title = null;
 
-
     #[ORM\Column(length: 255)]
     #[Gedmo\Slug(fields: ['title'])]
     private ?string $slug = null;
@@ -42,7 +40,6 @@ class Article
     private ?bool $enable = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
@@ -116,7 +113,7 @@ class Article
     #[ORM\PrePersist]
     public function autoSetCreatedAt(): static
     {
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
 
         return $this;
     }
@@ -136,9 +133,8 @@ class Article
     #[ORM\PreUpdate]
     public function autoSetUpdatedAt(): static
     {
-        $this->updatedAt = new DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
 
         return $this;
     }
-
 }
