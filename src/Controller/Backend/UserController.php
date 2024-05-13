@@ -6,15 +6,14 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 // cette route prefixe les autres
 #[Route('/admin/users', name: 'admin.users')]
-
 class UserController extends AbstractController
 {
     public function __construct(
@@ -35,6 +34,7 @@ class UserController extends AbstractController
     {
         if (!$user) {
             $this->addFlash('error', 'Utilisateur non trouvé');
+
             return $this->redirectToRoute('admin.users.index');
         }
 
@@ -49,10 +49,12 @@ class UserController extends AbstractController
 
             return $this->redirectToRoute('admin.users.index');
         }
+
         return $this->render('Backend/Users/update.html.twig', [
-            'form' => $form
+            'form' => $form,
         ]);
     }
+
     #[Route('/{id}/delete', name: '.delete', methods: ['POST'])]
     public function delete(?User $user, Request $request): RedirectResponse
     {
@@ -62,16 +64,15 @@ class UserController extends AbstractController
             return $this->redirectToRoute('admin.users.index');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('token')))
-        {
+        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('token'))) {
             $this->em->remove($user);
             $this->em->flush();
 
             $this->addFlash('success', 'User supprimé avec succès');
-
-        }else{
+        } else {
             $this->addFlash('error', 'Invalid token csrf');
         }
-            return $this->redirectToRoute('admin.users.index');
-        }
+
+        return $this->redirectToRoute('admin.users.index');
+    }
 }
