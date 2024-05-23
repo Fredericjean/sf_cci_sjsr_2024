@@ -4,6 +4,9 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Entity\Article;
+use App\Entity\Categorie;
+use App\Repository\CategorieRepository;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -11,6 +14,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class ArticleType extends AbstractType
 {
@@ -22,25 +26,48 @@ class ArticleType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Titre de votre article',
                 ],
+            ])
+
+            ->add('categories', EntityType::class, [
+                'class' => Categorie::class,
+                'choice_label' => 'name',
+                'expanded' => false,
+                'multiple' => true,
+                'autocomplete' => true,
+                'by_reference' => false,
+                'query_builder' => function (CategorieRepository $repo): QueryBuilder {
+                    return $repo->createQueryBuilder('c')
+                        ->andWhere('c.enable = :enable')
+                        ->setParameter('enable', true)
+                        ->orderBy('c.name', 'ASC');
+                },
             ]);
 
-         if($options['isEdit']){
+        if ($options['isEdit']) {
             $builder
-            ->add('user', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'firstname',
-                'expanded' =>false,
-                'multiple' =>false,
-            ]);
-         }   
+                ->add('user', EntityType::class, [
+                    'class' => User::class,
+                    'choice_label' => 'firstname',
+                    'expanded' => false,
+                    'multiple' => false,
+                ]);
+        }
 
         $builder
-        ->add('content', TextareaType::class, [
+            ->add('content', TextareaType::class, [
                 'label' => 'Contenu',
                 'attr' => [
                     'placeholder' => 'Contenu de votre article',
                     'rows' => 5,
                 ],
+            ])
+            ->add('imageFile', VichImageType::class, [
+                'label'=>'Image',
+                'required' => false,
+                'allow_delete' => true,
+                'delete_label' => 'Supprimer l\'image',
+                'download_uri' => false,
+                'image_uri' => true,
             ])
             ->add('enable', CheckboxType::class, [
                 'label' => 'Actif',
@@ -53,7 +80,7 @@ class ArticleType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Article::class,
             'sanitize_html' => true,
-            'isEdit'=>false,
+            'isEdit' => false,
         ]);
     }
 }

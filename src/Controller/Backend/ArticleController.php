@@ -103,7 +103,7 @@ class ArticleController extends AbstractController
         if (!$article) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'Article not found',
+                'message' => 'Article not founddd',
             ], 404);
         }
 
