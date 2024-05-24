@@ -9,7 +9,7 @@
 						<a class="nav-link {{app.request.get('_route') =='app.home'? 'active'}}" href="{{ path('app.home')}}" aria-current="page">Home</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link {{app.request.get('_route') =='app.articles.index'? 'active'}}" href="#">Article</a>
+						<a class="nav-link {{app.request.get('_route') =='app.articles.index'? 'active'}}" href="{{ path('app.articles.index')}}">Articles</a>
 					</li>
 				</ul>
 				<ul class="navbar-nav ms-auto">
