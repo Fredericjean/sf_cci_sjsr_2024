@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes articles
+{{parent()}}
+{% endblock %}
+{% block body %}
+
+<section class="">
+	</section>
+	<section class="container mt-2">
+    <h1>Tous nos articles actifs</h1>
+		<div class="blog-list mt-4">
+		{% for article in articles %}
+		{% include 'Components/_articleCard.html.twig' %}
+			
+		{% endfor %}
+		</div>
+		
+	</section>
+{% endblock %}
